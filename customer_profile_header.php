@@ -79,7 +79,7 @@ body#customer_profile {
             <a href="customer_pass_change.php"><li class="link3">Change Password</li></a>
             <a href="fund_transfer.php"><li class="link4">Fund Transfer</li></a>
             <a href="cust_statement.php"><li class="link5">Bank Statement</li></a>
-            <!-- <a href="cust_statement_track.php"><li class="link6">Track</li></a> -->
+            <a href="cust_statement_track.php"><li class="link6">Track</li></a>
             </ul>
             </div>
 
