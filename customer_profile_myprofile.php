@@ -36,7 +36,7 @@ background-color: rgba(5, 21, 71,0.4);
 
 
     
-    <<div class="myprofile_container">
+    <div class="myprofile_container">
     
 
     <div class="customer_profile_details">
