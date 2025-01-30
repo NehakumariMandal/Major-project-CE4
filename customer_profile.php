@@ -42,7 +42,7 @@ $maskedAccountNumber = maskSensitiveData($_SESSION['Account_No']);
             <label>Account Number : <?php echo $maskedAccountNumber; ?></label>
             <label>Account Name : <?php echo $_SESSION['Username']; ?></label>
             <label>Account Type : <?php echo $_SESSION['Account_type']; ?></label>
-            <label>Available Balance : $<?php echo $current_bal; ?></label>  
+            <label>Available Balance : ₹<?php echo $current_bal; ?></label>  
         </div>
         
         <div class="statement">
@@ -72,7 +72,7 @@ $maskedAccountNumber = maskSensitiveData($_SESSION['Account_No']);
                             <td>' . $row['Description'] . '</td>
                             <td>' . $row['Cr_amount'] . '</td>
                             <td>' . $row['Dr_amount'] . '</td>
-                            <td>$' . $row['Net_Balance'] . '</td>
+                            <td>₹' . $row['Net_Balance'] . '</td>
                         </tr>';
                     }
                 }

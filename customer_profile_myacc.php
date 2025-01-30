@@ -65,8 +65,8 @@ if($_SESSION['customer_login'] == true)
         <label>Account Type : <?php echo $_SESSION['Account_type']; ?></label>
         <label>IFSC Code : <?php echo $_SESSION['IFSC_Code']; ?></label>
         <label>Branch : <?php echo $_SESSION['Branch']; ?></label>
-        <label>Cheque : <?php echo $_SESSION['Cheque']; ?></label>
-        <label>Available Balance : $<?php echo $current_bal; ?></label>
+        <!-- <label>Cheque : <?php echo $_SESSION['Cheque']; ?></label> -->
+        <!-- <label>Available Balance : ₹<?php echo $current_bal; ?></label> -->
         <label>Mobile No : <?php echo $maskedMobileNo; ?></label>
         <label>Debit Card No : <?php echo $maskedDebitCardNo; ?></label>
         <label>Nominee Name : <?php echo $_SESSION['Nominee_name']; ?></label>

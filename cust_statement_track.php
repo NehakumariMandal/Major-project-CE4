@@ -20,8 +20,9 @@ if (!isset($_SESSION['customer_login']) || $_SESSION['customer_login'] !== true)
 // Fetch the customer's name from session (assuming it's stored when logged in)
 $customer_name = $_SESSION['Username'];
 
-// Initialize block data
+// Initialize variables
 $block_data = null;
+$error_message = null;
 
 // Check if block number is submitted
 if (isset($_POST['block_number']) && !empty($_POST['block_number'])) {
@@ -36,8 +37,27 @@ if (isset($_POST['block_number']) && !empty($_POST['block_number'])) {
 
     // Check if data exists for the given block number
     if ($result && $result->num_rows > 0) {
-        // Fetch the row data if available
         $block_data = $result->fetch_assoc();
+
+        // Generate hash for the current transaction
+        $transaction_content = $block_data["id"] . $block_data["Transaction_id"] . $block_data["Transaction_date"] . $block_data["Description"] . $block_data["Cr_amount"] . $block_data["Dr_amount"] . $block_data["Net_Balance"];
+        $current_hash = hash("sha256", $transaction_content);
+
+        // Fetch the previous hash if it exists
+        $previous_hash = null;
+        if ($block_data["id"] > 1) {
+            $sql_prev = "SELECT * FROM passbook_1011046 WHERE id = ?";
+            $stmt_prev = $conn->prepare($sql_prev);
+            $previous_block_id = $block_data["id"] - 1; // Previous block
+            $stmt_prev->bind_param("i", $previous_block_id);
+            $stmt_prev->execute();
+            $result_prev = $stmt_prev->get_result();
+            if ($result_prev && $result_prev->num_rows > 0) {
+                $previous_block = $result_prev->fetch_assoc();
+                $previous_content = $previous_block["id"] . $previous_block["Transaction_id"] . $previous_block["Transaction_date"] . $previous_block["Description"] . $previous_block["Cr_amount"] . $previous_block["Dr_amount"] . $previous_block["Net_Balance"];
+                $previous_hash = hash("sha256", $previous_content);
+            }
+        }
     } else {
         $error_message = "No data found for Block Number " . htmlspecialchars($block_number);
     }
@@ -53,7 +73,7 @@ $conn->close();
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Responsive Blockchain Transaction</title>
+  <title>Blockchain Transaction</title>
   <style>
     /* body {
       font-family: Arial, sans-serif;
@@ -271,16 +291,16 @@ $conn->close();
     
     <!-- Form for block number input -->
     <div class="form-container">
-    <form method="POST" action="">
-      <label for="block_number">Enter Block Number:</label>
-      <input type="number" id="block_number" name="block_number" min="1" required>
-      <button type="submit">Submit</button>
-    </form>
-</div>
+      <form method="POST" action="">
+        <label for="block_number">Enter Block Number:</label>
+        <input type="number" id="block_number" name="block_number" min="1" required>
+        <button type="submit">Submit</button>
+      </form>
+    </div>
 
     <!-- Display error message if applicable -->
     <?php if (isset($error_message)) { ?>
-        <div class="error-message" style="color: red; font-weight: bold;">
+        <div class="error-message">
             <?= htmlspecialchars($error_message); ?>
         </div>
     <?php } ?>
@@ -292,8 +312,8 @@ $conn->close();
           <h2>Block Header</h2>
           <ul>
             <li><span>Block Number:</span> <?= htmlspecialchars($block_data["id"]) ?></li>
-            <li><span>Previous Hash:</span> 0000abcdef123456</li>
-            <li><span>Hash:</span> abcd1234567890ef</li>
+            <li><span>Previous Hash:</span> <?= $previous_hash ? substr($previous_hash, 0, 14) . "..." : "None" ?></li>
+            <li><span>Hash:</span> <?= substr($current_hash, 0, 14) . "..." ?></li>
           </ul>
         </div>
         <div class="arrow"></div>
@@ -303,8 +323,8 @@ $conn->close();
           <h2>Transaction Metadata</h2>
           <ul>
             <li><span>Transaction ID:</span> <?= htmlspecialchars($block_data["Transaction_id"]) ?></li>
-            <li><span>Timestamp:</span> <?= htmlspecialchars($block_data["Transaction_date"]) ?></li>
-            <li><span>Purpose:</span> <?= htmlspecialchars($block_data["Remark"]) ?></li>
+            <li><span>Date:</span> <?= htmlspecialchars($block_data["Transaction_date"]) ?></li>
+            <li><span>Purpose:</span> <?= $block_data["Remark"] ? htmlspecialchars($block_data["Remark"]) : "No data available" ?></li>
           </ul>
         </div>
         <div class="arrow"></div>
@@ -313,15 +333,15 @@ $conn->close();
         <div class="block">
           <h2>Participant Details</h2>
           <ul>
-            <?php if (floatval($block_data["Cr_amount"]) > 0) { ?>
-              <li><span>Receiver:</span> <?= htmlspecialchars($customer_name) ?></li>
+            <?php if (floatval($block_data["Cr_amount"]) > 0): ?>
               <li><span>Sender:</span> <?= htmlspecialchars($block_data["Description"]) ?></li>
-            <?php } elseif (floatval($block_data["Dr_amount"]) > 0) { ?>
+              <li><span>Receiver:</span> <?= htmlspecialchars($customer_name) ?></li>
+            <?php elseif (floatval($block_data["Dr_amount"]) > 0): ?>
               <li><span>Sender:</span> <?= htmlspecialchars($customer_name) ?></li>
               <li><span>Receiver:</span> <?= htmlspecialchars($block_data["Description"]) ?></li>
-            <?php } else { ?>
-              <li><span>Transaction Type:</span> No transaction available.</li>
-            <?php } ?>
+            <?php else: ?>
+              <li>No data available</li>
+            <?php endif; ?>
           </ul>
         </div>
         <div class="arrow"></div>
@@ -330,14 +350,13 @@ $conn->close();
         <div class="block">
           <h2>Transaction Amount</h2>
           <ul>
-            <li><span>Credit Amount:</span> <?= htmlspecialchars($block_data["Cr_amount"]) ?></li>
-            <li><span>Debit Amount:</span> <?= htmlspecialchars($block_data["Dr_amount"]) ?></li>
-            <li><span>Net Balance:</span> <?= htmlspecialchars($block_data["Net_Balance"]) ?></li>
+            <li><span>Credit: ₹</span><?= htmlspecialchars($block_data["Cr_amount"]) ?></li>
+            <li><span>Debit: ₹</span><?= htmlspecialchars($block_data["Dr_amount"]) ?></li>
+            <li><span>Net Balance: ₹</span><?= htmlspecialchars($block_data["Net_Balance"]) ?></li>
           </ul>
         </div>
       </div>
     <?php endif; ?>
   </div>
 </body>
-<?php include 'footer.php'; ?>
 </html>

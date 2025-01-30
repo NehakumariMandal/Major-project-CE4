@@ -75,7 +75,7 @@ body#customer_profile {
         <div class="profile_nav">
         <ul>
             <a href="customer_profile_myacc.php"><li class="link1">My Account</li></a>
-            <a href="customer_profile_myprofile.php"><li class="link2">My Profile</li></a>
+            <!-- <a href="customer_profile_myprofile.php"><li class="link2">My Profile</li></a> -->
             <a href="customer_pass_change.php"><li class="link3">Change Password</li></a>
             <a href="fund_transfer.php"><li class="link4">Fund Transfer</li></a>
             <a href="cust_statement.php"><li class="link5">Bank Statement</li></a>

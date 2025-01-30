@@ -71,6 +71,12 @@
         input[type="submit"]:hover {
             background-color: #004080;
         }
+
+        .password-requirements {
+            color: red;
+            font-size: 14px;
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
@@ -100,6 +106,14 @@
         </div>
         <input type="submit" onclick="sendMail()" name="change_pass" value="Change Password">
     </form>
+
+    <div class="password-requirements">
+    <p><strong>Password Instructions:</strong></p>
+    <ul>
+            <li>Password must be at least 8 characters long.</li>
+            <li>Password must contain at least one uppercase letter, one number, and one special character.</li>
+        </ul>
+    </div>
 </div>
 
 <?php include 'footer.php'; ?>
@@ -126,9 +140,10 @@
             return false;
         }
 
-        // Optionally, check password strength (e.g., minimum 8 characters, special characters)
-        if (newpass.length < 8) {
-            alert("New password must be at least 8 characters long.");
+        // Check if new password meets the requirements
+        var passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(newpass)) {
+            alert("New password must be at least 8 characters long, contain an uppercase letter, a number, and a special character.");
             return false;
         }
         
@@ -171,4 +186,4 @@ if(isset($_POST['change_pass'])){
         echo '<script>alert("Old password and Confirm Password do not match!")</script>';
     }
 }
-?>
+?>  
